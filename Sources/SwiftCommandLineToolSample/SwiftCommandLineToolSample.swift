@@ -3,57 +3,56 @@ import Foundation
 
 /// # SwiftCommandLineToolSample
 ///
-/// シェルコマンドを実行するための高機能サンプルコマンドラインツール。
+/// A high-functionality sample command-line tool for executing shell commands.
 ///
-/// このツールはSwift言語でのコマンドラインアプリケーション開発の参照実装として設計されており、
-/// ArgumentParserを活用した洗練されたCLIインターフェースを実装する方法を示す。
-/// 基本的なシェルコマンド実行から、複雑なデータ処理、Swift Concurrencyを用いた並列処理まで
-/// 幅広いユースケースをカバーする。
+/// This tool is designed as a reference implementation for command-line application development in Swift,
+/// demonstrating how to implement a sophisticated CLI interface using ArgumentParser.
+/// It covers a wide range of use cases, from basic shell command execution to complex data processing and parallel processing using Swift Concurrency.
 ///
-/// ## 主な機能
+/// ## Main Features
 ///
-/// - 基本的なシェルコマンドの実行
-/// - 複数のコマンドの連続実行
-/// - パイプラインを使用した複雑なコマンドの実行
-/// - コマンド出力の処理と加工
-/// - 豊富なコマンドライン引数受け取りのパターン
-/// - Swift Concurrencyを活用した非同期・並列処理
-/// - ファイル操作と変換処理
+/// - Basic shell command execution
+/// - Sequential execution of multiple commands
+/// - Complex command execution using pipelines
+/// - Processing and transformation of command output
+/// - Rich patterns for receiving command-line arguments
+/// - Asynchronous and parallel processing using Swift Concurrency
+/// - File operations and transformation processing
 ///
-/// > Tip: 各サブコマンドは単独で使用することも、組み合わせて複雑な処理を構築することも可能。
-/// > `--help`フラグを使用すると、各コマンドの詳細な使用方法が表示される。
+/// > Tip: Each subcommand can be used independently or combined to build complex processing flows.
+/// > Use the `--help` flag to display detailed usage for each command.
 ///
-/// ## 使用例
+/// ## Usage Examples
 ///
 /// ```swift
-/// // 基本的なコマンド実行
+/// // Basic command execution
 /// $ smp simple
 ///
-/// // データ処理と並列実行
+/// // Data processing and parallel execution
 /// $ smp dataprocess parallel -t 10 -d 0.5
 /// ```
 @main
 struct SwiftCommandLineToolSample: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "smp",
-        abstract: "Swiftで書かれたコマンドラインツールサンプル。",
+        abstract: "Sample command-line tool written in Swift.",
         subcommands: [SimpleCommand.self, ComplexCommand.self, PipeCommand.self, OutputCommand.self, ArgsCommand.self, DataProcessCommand.self]
     )
 
-    /// サブコマンドなしで実行された場合の処理。
-    /// ヘルプメッセージを表示する。
+    /// Handler when executed without subcommands.
+    /// Displays the help message.
     func run() throws {
-        // サブコマンドなしで実行された場合は、ヘルプを表示して終了
-        // printは不要、ArgumentParserの機能でヘルプを表示
+        // When executed without subcommands, display help and exit
+        // No need to print, ArgumentParser will display help
         throw CleanExit.helpRequest()
     }
 
-    /// 単純なコマンドを実行するサブコマンド。
-    /// 基本的なシェルコマンド実行の例を示す。
+    /// Subcommand for executing a simple command.
+    /// Example of basic shell command execution.
     struct SimpleCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "simple",
-            abstract: "単純なコマンドの実行例"
+            abstract: "Example of executing a simple command"
         )
 
         func run() throws {
@@ -66,37 +65,37 @@ struct SwiftCommandLineToolSample: ParsableCommand {
         }
     }
 
-    /// 複数のコマンドを連結して実行するサブコマンド。
-    /// セミコロンを使用して複数のシェルコマンドを順番に実行する例を示す。
+    /// Subcommand for executing multiple commands in sequence.
+    /// Example of executing multiple shell commands in order using semicolons.
     struct ComplexCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "complex",
-            abstract: "複数のコマンドを連結して実行する例"
+            abstract: "Example of executing multiple commands in sequence"
         )
 
         func run() throws {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            // 複数コマンドをセミコロンで連結
-            process.arguments = ["-c", "date '+%Y-%m-%d %H:%M:%S'; echo '現在のディレクトリ:'; pwd; echo '現在のユーザー:'; whoami"]
+            // Concatenate multiple commands with semicolons
+            process.arguments = ["-c", "date '+%Y-%m-%d %H:%M:%S'; echo 'Current directory:'; pwd; echo 'Current user:'; whoami"]
 
             try process.run()
             process.waitUntilExit()
         }
     }
 
-    /// パイプを使用した複雑なコマンドを実行するサブコマンド。
-    /// Unixパイプライン処理を使用した複雑なコマンド実行の例を示す。
+    /// Subcommand for executing complex commands using pipes.
+    /// Example of complex command execution using Unix pipeline processing.
     struct PipeCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "pipe",
-            abstract: "パイプを使った複雑なコマンドの例"
+            abstract: "Example of complex command using pipes"
         )
 
         func run() throws {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            // パイプ、グレップ、ソートを使用した複雑なコマンド
+            // Complex command using pipes, grep, and sort
             process.arguments = ["-c", "ls -la | grep '^d' | sort -r | head -3"]
 
             try process.run()
@@ -104,12 +103,12 @@ struct SwiftCommandLineToolSample: ParsableCommand {
         }
     }
 
-    /// コマンド出力を取得して処理するサブコマンド。
-    /// パイプを使ってコマンド出力を取得し、Swiftで加工する例を示す。
+    /// Subcommand for obtaining and processing command output.
+    /// Example of obtaining command output using a pipe and processing it in Swift.
     struct OutputCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "output",
-            abstract: "コマンド出力を取得する例"
+            abstract: "Example of obtaining command output"
         )
 
         func run() throws {
@@ -117,42 +116,42 @@ struct SwiftCommandLineToolSample: ParsableCommand {
             let pipe = Pipe()
 
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = ["-c", "echo 'このテキストはSwiftで処理されます' | wc -w"]
+            process.arguments = ["-c", "echo 'This text will be processed in Swift' | wc -w"]
             process.standardOutput = pipe
 
             try process.run()
 
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let output = String(data: data, encoding: .utf8) {
-                print("コマンド出力: \(output.trimmingCharacters(in: .whitespacesAndNewlines)) 単語")
-                print("Swiftで出力を処理して加工できます")
+                print("Command output: \(output.trimmingCharacters(in: .whitespacesAndNewlines)) words")
+                print("You can process and transform output in Swift")
             }
 
             process.waitUntilExit()
         }
     }
 
-    /// コマンドライン引数を処理するサブコマンド。
-    /// さまざまな種類の引数（位置引数、オプション、フラグ）の使用例を示す。
+    /// Subcommand for processing command-line arguments.
+    /// Example usage of various types of arguments (positional, options, flags).
     struct ArgsCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "args",
-            abstract: "引数を受け取るコマンドの例"
+            abstract: "Example of a command that receives arguments"
         )
 
-        /// 処理する文字列の位置引数。
-        /// このパラメータは必須で、コマンド実行時に必ず指定する必要がある。
-        @Argument(help: "処理する文字列")
+        /// Positional argument for the string to process.
+        /// This parameter is required and must be specified when running the command.
+        @Argument(help: "String to process")
         var text: String
 
-        /// 繰り返し回数を指定するオプション引数。
-        /// `-c`または`--count`のいずれかで指定可能。デフォルト値は1。
-        @Option(name: .shortAndLong, help: "繰り返し回数")
+        /// Option argument to specify the number of repetitions.
+        /// Can be specified with either `-c` or `--count`. Default is 1.
+        @Option(name: .shortAndLong, help: "Number of repetitions")
         var count: Int = 1
 
-        /// テキストを大文字に変換するかどうかのフラグ。
-        /// `-u`または`--uppercase`で有効化される。
-        @Flag(name: .shortAndLong, help: "大文字に変換する")
+        /// Flag to indicate whether to convert text to uppercase.
+        /// Enabled with `-u` or `--uppercase`.
+        @Flag(name: .shortAndLong, help: "Convert to uppercase")
         var uppercase: Bool = false
 
         func run() throws {
@@ -173,12 +172,12 @@ struct SwiftCommandLineToolSample: ParsableCommand {
         }
     }
 
-    /// データ処理を行うサブコマンド。
-    /// Swift Concurrencyを活用した並行処理と高度なデータ操作の例を示す。
+    /// Subcommand for data processing.
+    /// Example of advanced data operations and parallel processing using Swift Concurrency.
     struct DataProcessCommand: ParsableCommand {
         static let configuration = CommandConfiguration(
             commandName: "dataprocess",
-            abstract: "Swift Concurrency活用データ処理の例",
+            abstract: "Example of data processing using Swift Concurrency",
             subcommands: [
                 APIFetchCommand.self,
                 JSONProcessingCommand.self,
@@ -187,36 +186,36 @@ struct SwiftCommandLineToolSample: ParsableCommand {
             ]
         )
 
-        /// サブコマンドなしで実行された場合のヘルプを表示。
+        /// Display help when executed without subcommands.
         func run() throws {
             throw CleanExit.helpRequest()
         }
 
-        /// API呼び出しを行うサブコマンド。
-        /// Swift Concurrencyを使用した非同期API呼び出しとデータ取得の例。
+        /// Subcommand for API calls.
+        /// Example of asynchronous API calls and data retrieval using Swift Concurrency.
         struct APIFetchCommand: ParsableCommand {
             static let configuration = CommandConfiguration(
                 commandName: "fetch",
-                abstract: "非同期APIデータ取得の例"
+                abstract: "Example of asynchronous API data retrieval"
             )
 
-            /// 取得するAPIのURLオプション引数。
-            /// `-u`または`--url`で指定されたURLからデータを取得。
-            @Option(name: .shortAndLong, help: "データを取得するAPIのURL")
+            /// Option argument for the API URL to fetch.
+            /// Fetches data from the URL specified with `-u` or `--url`.
+            @Option(name: .shortAndLong, help: "API URL to fetch data from")
             var url: String = "https://jsonplaceholder.typicode.com/todos/1"
 
-            /// 出力データを保存するオプション引数。
-            /// `-o`または`--output`で指定されたファイルに結果を保存。
-            @Option(name: .shortAndLong, help: "出力データファイル")
+            /// Option argument to specify the output file for the data.
+            /// Saves the result to the file specified with `-o` or `--output`.
+            @Option(name: .shortAndLong, help: "Output data file")
             var outputFile: String?
 
-            /// 詳細表示フラグ。
-            /// `-v`または`--verbose`で詳細なログを表示。
-            @Flag(name: .shortAndLong, help: "詳細出力を表示")
+            /// Verbose flag.
+            /// Displays detailed logs with `-v` or `--verbose`.
+            @Flag(name: .shortAndLong, help: "Show verbose output")
             var verbose: Bool = false
 
             func run() throws {
-                // Swift Concurrencyをブロッキングで実行
+                // Run Swift Concurrency in a blocking manner
                 let runLoop = RunLoop.current
                 let semaphore = DispatchSemaphore(value: 0)
 
@@ -225,100 +224,100 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     semaphore.signal()
                 }
 
-                // ブロッキング待機（非推奨だが、ParsableCommandの制約内で必要）
+                // Blocking wait (not recommended, but necessary within ParsableCommand constraints)
                 while semaphore.wait(timeout: .now()) == .timedOut {
                     runLoop.run(until: Date(timeIntervalSinceNow: 0.1))
                 }
             }
 
-            /// 非同期でAPIデータを取得し処理する。
+            /// Asynchronously fetch and process API data.
             @MainActor
             func fetchAPIData() async {
                 if verbose {
-                    print("URLからデータ取得を開始：\(url)")
+                    print("Starting data fetch from URL: \(url)")
                 }
 
                 guard let apiURL = URL(string: url) else {
-                    print("エラー: 無効なURL")
+                    print("Error: Invalid URL")
                     return
                 }
 
                 do {
                     if verbose {
-                        print("リクエスト開始...")
+                        print("Starting request...")
                     }
 
-                    // Swift Concurrencyを使った非同期ネットワークリクエスト
+                    // Asynchronous network request using Swift Concurrency
                     let (data, response) = try await URLSession.shared.data(from: apiURL)
 
                     guard let httpResponse = response as? HTTPURLResponse else {
-                        print("エラー: HTTPレスポンスを取得できませんでした")
+                        print("Error: Could not get HTTP response")
                         return
                     }
 
                     if verbose {
-                        print("ステータスコード: \(httpResponse.statusCode)")
+                        print("Status code: \(httpResponse.statusCode)")
                     }
 
                     guard httpResponse.statusCode == 200 else {
-                        print("エラー: APIリクエスト失敗 (ステータスコード: \(httpResponse.statusCode))")
+                        print("Error: API request failed (status code: \(httpResponse.statusCode))")
                         return
                     }
 
-                    // レスポンスデータをJSON形式に変換
+                    // Convert response data to JSON format
                     if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
                        let prettyJsonString = String(data: jsonData, encoding: .utf8) {
 
-                        // 結果の出力
+                        // Output the result
                         if let outputFile = outputFile {
                             let fileURL = URL(fileURLWithPath: outputFile)
                             try prettyJsonString.write(to: fileURL, atomically: true, encoding: .utf8)
-                            print("結果をファイル '\(outputFile)' に保存しました")
+                            print("Result saved to file '\(outputFile)'")
                         } else {
-                            print("APIレスポンス:")
+                            print("API response:")
                             print(prettyJsonString)
                         }
                     } else {
-                        print("エラー: JSONデータの処理に失敗しました")
+                        print("Error: Failed to process JSON data")
                     }
                 } catch {
-                    print("エラー: \(error.localizedDescription)")
+                    print("Error: \(error.localizedDescription)")
                 }
             }
         }
 
-        /// JSONデータ処理を行うサブコマンド。
-        /// JSONデータの処理、変換、検索機能を提供する。
+        /// Subcommand for JSON data processing.
+        /// Provides JSON data processing, transformation, and search functionality.
         struct JSONProcessingCommand: ParsableCommand {
             static let configuration = CommandConfiguration(
                 commandName: "json",
-                abstract: "JSONデータ処理の例"
+                abstract: "Example of JSON data processing"
             )
 
-            /// 入力JSONファイルのパスオプション引数。
-            @Option(name: .shortAndLong, help: "処理するJSONファイルパス")
+            /// Option argument for the input JSON file path.
+            @Option(name: .shortAndLong, help: "Path to the JSON file to process")
             var inputFile: String?
 
-            /// クエリキーオプション引数。
-            /// `-k`または`--key`で指定されたキーの値を抽出。
-            @Option(name: .shortAndLong, help: "抽出するJSONキーパス（例: user.name）")
+            /// Option argument for the query key.
+            /// Extracts the value for the key specified with `-k` or `--key` (e.g., user.name).
+            @Option(name: .shortAndLong, help: "JSON key path to extract (e.g., user.name)")
             var keyPath: String?
 
-            /// フィルターのオプション引数。
-            /// `-f`または`--filter`で指定された条件でフィルタリング。
-            @Option(name: .shortAndLong, help: "特定の条件でフィルタリング（例: id=1）")
+            /// Option argument for filtering.
+            /// Filters by the condition specified with `-f` or `--filter` (e.g., id=1).
+            @Option(name: .shortAndLong, help: "Filter by specific condition (e.g., id=1)")
             var filter: String?
 
             func run() throws {
-                // JSONデータを取得
+                // Obtain JSON data
                 var jsonData: Data
 
                 if let inputFile = inputFile {
                     let fileURL = URL(fileURLWithPath: inputFile)
                     jsonData = try Data(contentsOf: fileURL)
                 } else {
-                    // サンプルJSONを使用
+                    // Use sample JSON
                     let sampleJson = """
                     [
                       {
@@ -344,21 +343,21 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     jsonData = sampleJson.data(using: .utf8)!
                 }
 
-                // JSONデータをパース
+                // Parse JSON data
                 guard let jsonArray = try JSONSerialization.jsonObject(with: jsonData) as? [[String: Any]] else {
-                    print("エラー: 有効なJSON配列ではありません")
+                    print("Error: Not a valid JSON array")
                     return
                 }
 
-                // キーパスが指定されている場合は抽出
+                // Extract if key path is specified
                 if let keyPath = keyPath {
                     let keys = keyPath.split(separator: ".")
 
-                    print("キー '\(keyPath)' での抽出結果:")
+                    print("Extraction result for key '\(keyPath)':")
                     for (index, item) in jsonArray.enumerated() {
                         var currentValue: Any? = item
 
-                        // ネストされたキーをたどる
+                        // Traverse nested keys
                         for key in keys {
                             if let dict = currentValue as? [String: Any] {
                                 currentValue = dict[String(key)]
@@ -369,24 +368,24 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                         }
 
                         if let value = currentValue {
-                            print("項目[\(index)]: \(value)")
+                            print("Item[\(index)]: \(value)")
                         }
                     }
                 }
 
-                // フィルターが指定されている場合はフィルタリング
+                // Filter if filter is specified
                 if let filter = filter, filter.contains("=") {
                     let components = filter.split(separator: "=")
                     if components.count == 2 {
                         let key = String(components[0])
                         let value = String(components[1])
 
-                        print("フィルター '\(key)=\(value)' での結果:")
+                        print("Results for filter '\(key)=\(value)':")
 
-                        // 条件に合致する項目をフィルタリング
+                        // Filter items matching the condition
                         let filteredItems = jsonArray.filter { item in
                             if let itemValue = item[key] {
-                                // 特殊な型のケースを処理
+                                // Handle special types
                                 switch itemValue {
                                 case let boolValue as Bool:
                                     return (value.lowercased() == "true" && boolValue) ||
@@ -403,14 +402,14 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                             return false
                         }
 
-                        // フィルタリングされた結果を表示
+                        // Display filtered results
                         if filteredItems.isEmpty {
-                            print("条件に一致する項目はありません")
+                            print("No items match the condition")
                         } else {
                             for (index, item) in filteredItems.enumerated() {
                                 if let itemData = try? JSONSerialization.data(withJSONObject: item, options: .prettyPrinted),
                                    let prettyString = String(data: itemData, encoding: .utf8) {
-                                    print("結果[\(index)]:")
+                                    print("Result[\(index)]:")
                                     print(prettyString)
                                 }
                             }
@@ -418,40 +417,40 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     }
                 }
 
-                // キーパスもフィルターも指定されていない場合は全データ表示
+                // If neither key path nor filter is specified, display all data
                 if keyPath == nil && filter == nil {
                     if let prettyData = try? JSONSerialization.data(withJSONObject: jsonArray, options: .prettyPrinted),
                        let prettyString = String(data: prettyData, encoding: .utf8) {
-                        print("JSONデータ:")
+                        print("JSON data:")
                         print(prettyString)
                     }
                 }
             }
         }
 
-        /// 並列処理を実行するサブコマンド。
-        /// Swift Concurrencyを使用した並列処理の例を示す。
+        /// Subcommand for parallel processing.
+        /// Example of parallel processing using Swift Concurrency.
         struct ParallelProcessingCommand: ParsableCommand {
             static let configuration = CommandConfiguration(
                 commandName: "parallel",
-                abstract: "Swift Concurrency並列処理の例"
+                abstract: "Example of parallel processing using Swift Concurrency"
             )
 
-            /// 処理するタスク数オプション引数。
-            @Option(name: .shortAndLong, help: "処理するタスク数")
+            /// Option argument for the number of tasks to process.
+            @Option(name: .shortAndLong, help: "Number of tasks to process")
             var tasks: Int = 5
 
-            /// 各タスクの処理時間オプション引数（秒）。
-            @Option(name: .shortAndLong, help: "各タスクの処理時間（秒）")
+            /// Option argument for the processing time of each task (seconds).
+            @Option(name: .shortAndLong, help: "Processing time for each task (seconds)")
             var duration: Double = 1.0
 
-            /// シーケンシャル実行フラグ。
-            /// `-s`または`--sequential`で並列ではなく逐次実行する。
-            @Flag(name: .shortAndLong, help: "並列ではなく逐次実行")
+            /// Sequential execution flag.
+            /// Executes sequentially instead of in parallel with `-s` or `--sequential`.
+            @Flag(name: .shortAndLong, help: "Execute sequentially instead of in parallel")
             var sequential: Bool = false
 
             func run() throws {
-                // Swift Concurrencyをブロッキングで実行
+                // Run Swift Concurrency in a blocking manner
                 let runLoop = RunLoop.current
                 let semaphore = DispatchSemaphore(value: 0)
 
@@ -460,43 +459,43 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     semaphore.signal()
                 }
 
-                // ブロッキング待機（非推奨だが、ParsableCommandの制約内で必要）
+                // Blocking wait (not recommended, but necessary within ParsableCommand constraints)
                 while semaphore.wait(timeout: .now()) == .timedOut {
                     runLoop.run(until: Date(timeIntervalSinceNow: 0.1))
                 }
             }
 
-            /// 非同期でタスクを実行する。
+            /// Execute tasks asynchronously.
             @MainActor
             func executeParallelTasks() async {
-                print("タスク処理を開始: \(tasks)個のタスク（各\(duration)秒）を\(sequential ? "逐次" : "並列")で実行")
+                print("Starting task processing: executing \(tasks) tasks (\(duration) seconds each) \(sequential ? "sequentially" : "in parallel")")
 
                 let startTime = Date()
 
                 if sequential {
-                    // 逐次実行の場合
+                    // Sequential execution
                     for i in 1...tasks {
-                        print("タスク \(i) 開始")
-                        // タスク実行を疑似再現
+                        print("Task \(i) started")
+                        // Simulate task execution
                         try? await Task.sleep(for: .seconds(duration))
-                        print("タスク \(i) 完了")
+                        print("Task \(i) completed")
                     }
                 } else {
-                    // 並列実行の場合（Swift Concurrencyを活用）
+                    // Parallel execution using Swift Concurrency
                     await withTaskGroup(of: String.self) { group in
                         for i in 1...tasks {
                             group.addTask {
-                                print("タスク \(i) 開始")
-                                // タスク実行を疑似再現
+                                print("Task \(i) started")
+                                // Simulate task execution
                                 try? await Task.sleep(for: .seconds(duration))
-                                print("タスク \(i) 完了")
-                                return "タスク \(i) の結果"
+                                print("Task \(i) completed")
+                                return "Result of task \(i)"
                             }
                         }
 
-                        // 全タスクの結果を収集
+                        // Collect results from all tasks
                         for await _ in group {
-                            // 実際の処理ではここで結果を集約する
+                            // In actual processing, aggregate results here
                         }
                     }
                 }
@@ -504,62 +503,62 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                 let endTime = Date()
                 let elapsedTime = endTime.timeIntervalSince(startTime)
 
-                print("全タスク処理完了")
-                print("経過時間: \(String(format: "%.2f", elapsedTime))秒")
+                print("All tasks completed")
+                print("Elapsed time: \(String(format: "%.2f", elapsedTime)) seconds")
 
-                // 理論的な経過時間と比較
+                // Compare with theoretical elapsed time
                 let theoreticalTime = sequential ? Double(tasks) * duration : duration
-                print("理論的な処理時間: \(String(format: "%.2f", theoreticalTime))秒")
-                print("効率: \(String(format: "%.2f", theoreticalTime / elapsedTime * 100))%")
+                print("Theoretical processing time: \(String(format: "%.2f", theoreticalTime)) seconds")
+                print("Efficiency: \(String(format: "%.2f", theoreticalTime / elapsedTime * 100))%")
             }
         }
 
-        /// ファイル変換処理を行うサブコマンド。
-        /// ファイルの読み込み、変換、保存処理を非同期で実行する例を示す。
+        /// Subcommand for file transformation processing.
+        /// Example of asynchronously reading, transforming, and saving files.
         struct FileTransformCommand: ParsableCommand {
             static let configuration = CommandConfiguration(
                 commandName: "transform",
-                abstract: "ファイル変換処理の例"
+                abstract: "Example of file transformation processing"
             )
 
-            /// 入力ファイルオプション引数。
-            @Option(name: .shortAndLong, help: "処理する入力ファイル")
+            /// Option argument for the input file.
+            @Option(name: .shortAndLong, help: "Input file to process")
             var inputFile: String
 
-            /// 出力ファイルオプション引数。
-            @Option(name: .shortAndLong, help: "結果を保存する出力ファイル")
+            /// Option argument for the output file.
+            @Option(name: .shortAndLong, help: "Output file to save the result")
             var outputFile: String?
 
-            /// 変換タイプオプション引数。
-            @Option(name: .shortAndLong, help: "実行する変換タイプ（uppercase, lowercase, count, reverse）")
+            /// Option argument for the transformation type.
+            @Option(name: .shortAndLong, help: "Transformation type to execute (uppercase, lowercase, count, reverse)")
             var transformType: String = "uppercase"
 
-            /// バックアップ作成フラグ。
-            @Flag(name: .shortAndLong, help: "元ファイルのバックアップを作成")
+            /// Flag to create a backup.
+            @Flag(name: .shortAndLong, help: "Create a backup of the original file")
             var backup: Bool = false
 
             func run() throws {
-                // ファイル変換処理
+                // File transformation processing
                 let inputURL = URL(fileURLWithPath: inputFile)
 
-                // 入力ファイルの存在確認
+                // Check if input file exists
                 guard FileManager.default.fileExists(atPath: inputFile) else {
-                    print("エラー: 入力ファイル '\(inputFile)' が見つかりません")
+                    print("Error: Input file '\(inputFile)' not found")
                     return
                 }
 
-                // バックアップ作成
+                // Create backup
                 if backup {
                     let backupURL = inputURL.deletingPathExtension().appendingPathExtension("backup" + inputURL.pathExtension)
                     try FileManager.default.copyItem(at: inputURL, to: backupURL)
-                    print("バックアップ作成: \(backupURL.path)")
+                    print("Backup created: \(backupURL.path)")
                 }
 
-                // ファイル内容を読み込む
+                // Read file contents
                 do {
                     let inputData = try String(contentsOf: inputURL, encoding: .utf8)
 
-                    // 変換処理
+                    // Transformation processing
                     let transformedData: String
                     switch transformType {
                     case "uppercase":
@@ -571,20 +570,20 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                         let words = inputData.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
                         let characters = inputData.filter { !$0.isWhitespace }
                         transformedData = """
-                        集計結果:
-                        行数: \(lines.count)
-                        単語数: \(words.count)
-                        文字数: \(characters.count)
+                        Aggregation result:
+                        Lines: \(lines.count)
+                        Words: \(words.count)
+                        Characters: \(characters.count)
                         """
                     case "reverse":
                         transformedData = String(inputData.reversed())
                     default:
-                        print("エラー: 未知の変換タイプ '\(transformType)'")
-                        print("使用可能なタイプ: uppercase, lowercase, count, reverse")
+                        print("Error: Unknown transformation type '\(transformType)'")
+                        print("Available types: uppercase, lowercase, count, reverse")
                         return
                     }
 
-                    // 結果の出力
+                    // Output the result
                     let outputURL: URL
                     if let outputPath = outputFile {
                         outputURL = URL(fileURLWithPath: outputPath)
@@ -595,12 +594,12 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     }
 
                     try transformedData.write(to: outputURL, atomically: true, encoding: .utf8)
-                    print("変換結果を保存: \(outputURL.path)")
+                    print("Transformation result saved: \(outputURL.path)")
 
-                    // プレビュー表示
+                    // Preview display
                     let previewLimit = 200
                     let preview = transformedData.prefix(previewLimit)
-                    print("\n処理結果プレビュー（最初の\(previewLimit)文字）:")
+                    print("\nProcessing result preview (first \(previewLimit) characters):")
                     print("--------------------------")
                     print(preview)
                     if transformedData.count > previewLimit {
@@ -609,7 +608,7 @@ struct SwiftCommandLineToolSample: ParsableCommand {
                     print("--------------------------")
 
                 } catch {
-                    print("エラー: ファイル処理中に問題が発生しました - \(error.localizedDescription)")
+                    print("Error: Problem occurred during file processing - \(error.localizedDescription)")
                 }
             }
         }
