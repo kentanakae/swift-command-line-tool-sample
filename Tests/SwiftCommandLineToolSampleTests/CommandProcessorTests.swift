@@ -2,24 +2,24 @@ import Testing
 import Foundation
 @testable import SwiftCommandLineToolSample
 
-/// CommandExecutable のモック実装
+/// Mock implementation of CommandExecutable
 ///
-/// テスト用のモッククラスはSendableに手動で準拠する
+/// Mock classes for testing manually conform to Sendable
 final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
-    // テスト用に変更可能なプロパティを使用
+    // Using mutable properties for testing
     var executedCommands: [String] = []
     var returnResults: [CommandExecutor.ExecutionResult] = []
 
     func executeCommand(_ command: String, shell: String = "/bin/zsh") throws -> CommandExecutor.ExecutionResult {
-        // テスト環境では単一スレッドで実行されると想定
+        // Assume single-threaded execution in test environment
         executedCommands.append(command)
 
-        // モックの戻り値がセットされていればそれを返し、そうでなければデフォルト値を返す
+        // Return preset mock values if available, otherwise return default values
         if !returnResults.isEmpty {
             return returnResults.removeFirst()
         }
 
-        // デフォルト値
+        // Default value
         return CommandExecutor.ExecutionResult(output: "Mock output for: \(command)", error: "", exitCode: 0)
     }
 
@@ -27,20 +27,20 @@ final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
         try executeCommand(command, shell: shell)
     }
 
-    // 指定した結果をモックに設定するヘルパーメソッド
+    // Helper method to set specified results in the mock
     func setNextResult(output: String, error: String = "", exitCode: Int32 = 0) {
         returnResults.append(CommandExecutor.ExecutionResult(output: output, error: error, exitCode: exitCode))
     }
 }
 
-/// コマンド処理機能のテスト（モック使用）
+/// Tests for command processing functionality (using mocks)
 @Suite struct CommandProcessorTests {
 
-    @Test("モックを使ったコマンド実行のテスト")
+    @Test("Test command execution with mock")
     func testCommandExecutionWithMock() throws {
         let mockExecutor = MockCommandExecutor()
 
-        // テストケース1: 成功するケース
+        // Test case 1: Successful case
         mockExecutor.setNextResult(output: "Success!")
 
         let result1 = try mockExecutor.executeCommand("echo test")
@@ -49,7 +49,7 @@ final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
         #expect(result1.exitCode == 0)
         #expect(mockExecutor.executedCommands.last == "echo test")
 
-        // テストケース2: 失敗するケース
+        // Test case 2: Failure case
         mockExecutor.setNextResult(output: "", error: "Command failed", exitCode: 1)
 
         let result2 = try mockExecutor.executeCommand("invalid command")
@@ -59,8 +59,8 @@ final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
         #expect(mockExecutor.executedCommands.last == "invalid command")
     }
 
-    /// 特定のビジネスロジックをテストするクラス
-    /// - Note: このクラスはテスト環境でのみ使用され、スレッド間での共有は想定されていない
+    /// Class to test specific business logic
+    /// - Note: This class is used only in the test environment and is not expected to be shared between threads
     final class CommandProcessor {
         let executor: CommandExecutable
 
@@ -78,26 +78,26 @@ final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
                     if result.exitCode == 0 {
                         return result.output
                     }
-                    // 非0の終了コードでリトライ
+                    // Retry on non-zero exit code
                     lastError = NSError(domain: "CommandError", code: Int(result.exitCode), userInfo: [NSLocalizedDescriptionKey: result.error])
                 } catch {
                     lastError = error
                 }
 
                 attempts += 1
-                // 実際のアプリケーションでは適切な待機処理を入れる
+                // In a real application, appropriate wait logic would be inserted here
             }
 
-            throw lastError ?? NSError(domain: "CommandError", code: -1, userInfo: [NSLocalizedDescriptionKey: "最大リトライ回数に到達"])
+            throw lastError ?? NSError(domain: "CommandError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Maximum retry count reached"])
         }
     }
 
-    @Test("リトライ機能のテスト")
+    @Test("Test retry functionality")
     func testRetryFunctionality() throws {
         let mockExecutor = MockCommandExecutor()
         let processor = CommandProcessor(executor: mockExecutor)
 
-        // 最初の2回は失敗、3回目に成功するシナリオ
+        // Scenario: fail first 2 times, succeed on 3rd attempt
         mockExecutor.setNextResult(output: "", error: "Temporary failure", exitCode: 1)
         mockExecutor.setNextResult(output: "", error: "Temporary failure", exitCode: 1)
         mockExecutor.setNextResult(output: "Finally succeeded", error: "", exitCode: 0)
@@ -108,17 +108,17 @@ final class MockCommandExecutor: @unchecked Sendable, CommandExecutable {
         #expect(mockExecutor.executedCommands.count == 3)
     }
 
-    @Test("最大リトライ回数超過時の動作テスト")
+    @Test("Test behavior when maximum retries are exceeded")
     func testMaximumRetryExceeded() {
         let mockExecutor = MockCommandExecutor()
         let processor = CommandProcessor(executor: mockExecutor)
 
-        // すべての試行が失敗するシナリオ
+        // Scenario where all attempts fail
         mockExecutor.setNextResult(output: "", error: "Failure 1", exitCode: 1)
         mockExecutor.setNextResult(output: "", error: "Failure 2", exitCode: 1)
         mockExecutor.setNextResult(output: "", error: "Failure 3", exitCode: 1)
 
-        // エラーがスローされることを期待
+        // Expect an error to be thrown
         #expect(throws: Error.self) {
             _ = try processor.processWithRetry(command: "always-failing-command", maxRetries: 3)
         }

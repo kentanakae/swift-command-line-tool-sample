@@ -1,56 +1,56 @@
-# SwiftCommandLineToolSample テストガイド
+# SwiftCommandLineToolSample Test Guide
 
-このプロジェクトは Swift Testing フレームワークを使用してテストを実装しており、コマンドラインツールのさまざまな機能やシナリオをカバーしています。
+This project implements tests using the Swift Testing framework and covers various features and scenarios of the command-line tool.
 
-## テスト階層
+## Test Hierarchy
 
-テストは以下の階層で構成されています：
+Tests are structured in the following hierarchy:
 
-1. **単体テスト**：個々のコンポーネントを独立してテスト
-   - `CommandExecutorTests`: コマンド実行クラスの機能テスト
-   - `CommandProcessorTests`: モックを使用した依存性注入テスト
+1. **Unit Tests**: Testing individual components independently
+   - `CommandExecutorTests`: Tests for command execution class functionality
+   - `CommandProcessorTests`: Dependency injection tests using mocks
 
-2. **コマンドラインテスト**：実際のビルド済み実行ファイルを実行して動作を検証
-   - `CommandLineToolTests`: コマンドラインツール全体の動作テスト
+2. **Command-line Tests**: Verifying behavior by executing the actual built executable
+   - `CommandLineToolTests`: Tests for overall command-line tool behavior
 
-## テストの実行方法
+## How to Run Tests
 
-### すべてのテストを実行
+### Run All Tests
 
 ```bash
 swift test
 ```
 
-### 特定のテストスイートを実行
+### Run Specific Test Suites
 
 ```bash
-# 単体テストのみ実行
+# Run only unit tests
 swift test --filter SwiftCommandLineToolSampleTests.CommandExecutorTests
 
-# コマンドラインテストのみ実行
+# Run only command-line tests
 swift test --filter SwiftCommandLineToolSampleTests.CommandLineToolTests
 
-# 特定のテストケースのみ実行
+# Run only a specific test case
 swift test --filter SwiftCommandLineToolSampleTests.CommandExecutorTests/testBasicCommandExecution
 ```
 
-## テストの追加方法
+## How to Add Tests
 
-新しいテストを追加する場合：
+When adding new tests:
 
-1. 適切なテストスイートファイルを選択または新規作成
-2. `@Suite` で新しいテストスイートを定義、または既存のスイートに追加
-3. `@Test("テスト説明")` でテストケースを定義
-4. `#expect` マクロで期待値を検証
+1. Choose or create an appropriate test suite file
+2. Define a new test suite with `@Suite` or add to an existing suite
+3. Define test cases using `@Test("Test description")`
+4. Validate expected values using the `#expect` macro
 
 ```swift
-@Test("新機能のテスト")
+@Test("Test new feature")
 func testNewFeature() {
     let result = someFunction()
     #expect(result == expectedValue)
 }
 ```
 
-## モックの使用
+## Using Mocks
 
-外部依存性（シェルコマンド、ファイルシステムなど）をテストする場合は、`CommandProcessorTests.swift` のパターンを参考にモックオブジェクトを使用してください。
+When testing external dependencies (shell commands, file system, etc.), use mock objects following the pattern in `CommandProcessorTests.swift`.

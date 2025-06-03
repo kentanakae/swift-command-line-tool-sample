@@ -1,62 +1,62 @@
 import Testing
 @testable import SwiftCommandLineToolSample
 
-/// CommandExecutor クラスの機能をテストするスイート
+/// Test suite for testing CommandExecutor class functionality
 @Suite struct CommandExecutorTests {
-    /// テスト用インスタンス
+    /// Test instance
     let executor = CommandExecutor()
 
-    @Test("基本的なコマンド実行のテスト")
+    @Test("Test basic command execution")
     func testBasicCommandExecution() throws {
-        // 単純な echo コマンドのテスト
+        // Test simple echo command
         let result = try executor.executeCommand("echo 'Hello, Testing!'")
 
-        // 期待する結果の検証
+        // Verify expected results
         #expect(result.output == "Hello, Testing!")
         #expect(result.exitCode == 0)
         #expect(result.error.isEmpty)
     }
 
-    @Test("エラーを返すコマンドのテスト")
+    @Test("Test command that returns an error")
     func testErrorCommandExecution() throws {
-        // 存在しないコマンドを実行
+        // Execute a non-existent command
         let result = try executor.executeCommand("nonexistentcommand")
 
-        // エラーが発生し、終了コードが非0になることを確認
+        // Verify that an error occurred and exit code is non-zero
         #expect(result.exitCode != 0)
         #expect(!result.error.isEmpty)
     }
 
-    @Test("複数行の出力を持つコマンドのテスト")
+    @Test("Test command with multiline output")
     func testMultilineOutputCommand() throws {
-        // 複数行の出力を生成するコマンド
+        // Command that generates multiline output
         let result = try executor.executeCommand("echo -e 'Line 1\\nLine 2\\nLine 3'")
 
-        // 出力に複数行が含まれていることを確認
+        // Verify that output contains multiple lines
         #expect(result.output.contains("Line 1"))
         #expect(result.output.contains("Line 2"))
         #expect(result.output.contains("Line 3"))
         #expect(result.exitCode == 0)
     }
 
-    @Test("テキスト処理ロジックのテスト")
+    @Test("Test text processing logic")
     func testTextProcessing() {
-        // 通常のテキスト、1回繰り返し、大文字変換なし
+        // Normal text, repeated once, no uppercase conversion
         let result1 = executor.processText("test", count: 1, uppercase: false)
         #expect(result1 == "test")
 
-        // 通常のテキスト、3回繰り返し、大文字変換なし
+        // Normal text, repeated three times, no uppercase conversion
         let result2 = executor.processText("test", count: 3, uppercase: false)
         #expect(result2 == "test test test")
 
-        // 通常のテキスト、2回繰り返し、大文字変換あり
+        // Normal text, repeated twice, with uppercase conversion
         let result3 = executor.processText("test", count: 2, uppercase: true)
         #expect(result3 == "TEST TEST")
     }
 
-    @Test("テキスト処理コマンドの実行テスト")
+    @Test("Test text processing command execution")
     func testExecuteTextProcessing() throws {
-        // 基本的なテキスト処理コマンドのテスト
+        // Test basic text processing command
         let result = try executor.executeTextProcessing("testing", count: 2, uppercase: true)
 
         #expect(result.output == "TESTING TESTING")
@@ -64,21 +64,21 @@ import Testing
         #expect(result.error.isEmpty)
     }
 
-    @Test("特殊文字を含むテキストの処理テスト")
+    @Test("Test processing text with special characters")
     func testSpecialCharactersInTextProcessing() throws {
-        // 特殊文字（引用符、バックスラッシュなど）を含むテキストの処理
-        // shellを経由すると特殊文字は解釈される可能性があるため、文字列の正確な一致ではなく
-        // 重要な要素が含まれているかどうかを確認
+        // Process text containing special characters (quotes, backslashes, etc.)
+        // Since special characters may be interpreted when passed through the shell,
+        // we check for the presence of important elements rather than exact string matching
         let specialText = "Special \"characters\" with \\ and $variables"
         let result = try executor.executeTextProcessing(specialText, count: 1, uppercase: false)
 
-        // 完全一致ではなく、キーワードが含まれていることを確認
+        // Verify that keywords are present, rather than exact matching
         #expect(result.output.contains("Special"))
         #expect(result.output.contains("characters"))
         #expect(result.output.contains("with"))
         #expect(result.exitCode == 0)
 
-        // デバッグ用のログ出力（調査目的）
+        // Debug log output (for investigation purposes)
         print("Expected text: \(specialText)")
         print("Actual output: \(result.output)")
     }

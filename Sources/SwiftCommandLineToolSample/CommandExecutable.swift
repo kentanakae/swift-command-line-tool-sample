@@ -1,34 +1,34 @@
 import Foundation
 
-/// コマンド実行用のプロトコル
-/// テスト時のモック化のために抽象化
+/// Protocol for command execution
+/// Abstracted for mocking during tests
 public protocol CommandExecutable: Sendable {
-    /// シェルコマンドを実行する
+    /// Execute a shell command
     /// - Parameters:
-    ///   - command: 実行するコマンド
-    ///   - shell: 使用するシェル
-    /// - Returns: コマンド実行の結果
-    /// - Throws: 実行エラー
+    ///   - command: Command to execute
+    ///   - shell: Shell to use
+    /// - Returns: Result of command execution
+    /// - Throws: Execution error
     func executeCommand(_ command: String, shell: String) throws -> CommandExecutor.ExecutionResult
 
-    /// シェルコマンドを非同期で実行する
+    /// Execute a shell command asynchronously
     /// - Parameters:
-    ///   - command: 実行するコマンド
-    ///   - shell: 使用するシェル
-    /// - Returns: コマンド実行の結果
-    /// - Throws: 実行エラー
+    ///   - command: Command to execute
+    ///   - shell: Shell to use
+    /// - Returns: Result of command execution
+    /// - Throws: Execution error
     func executeCommandAsync(_ command: String, shell: String) async throws -> CommandExecutor.ExecutionResult
 }
 
-/// デフォルト実装を提供（下位互換性のため）
+/// Provides default implementation (for backward compatibility)
 public extension CommandExecutable {
     func executeCommandAsync(_ command: String, shell: String) async throws -> CommandExecutor.ExecutionResult {
-        // 同期メソッドでのデフォルト実装
+        // Default implementation using synchronous method
         try executeCommand(command, shell: shell)
     }
 }
 
-/// CommandExecutable プロトコルの標準実装
+/// Standard implementation of CommandExecutable protocol
 extension CommandExecutor: CommandExecutable {
-    // プロトコル準拠はすでに実装済み
+    // Protocol conformance is already implemented
 }

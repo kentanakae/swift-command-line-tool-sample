@@ -2,64 +2,64 @@ import Testing
 import Foundation
 @testable import SwiftCommandLineToolSample
 
-/// ビルドされた実行可能ファイルのパスを取得するヘルパー関数
+/// Helper function to get the path to the built executable
 func getProductsDirectory() -> URL {
     #if os(macOS)
-    // まず、通常のXCTestのバンドルパスを試みる
+    // First, try the normal XCTest bundle path
     for bundle in Bundle.allBundles where bundle.bundlePath.hasSuffix(".xctest") {
         return bundle.bundleURL.deletingLastPathComponent()
     }
 
-    // 上記で見つからない場合、実行しているディレクトリを基準に探す
-    // これはSwift Testingフレームワークで実行した場合に有効
+    // If not found above, search based on the current directory
+    // This is effective when running with Swift Testing framework
     let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 
-    // .build/debug を探す
+    // Look for .build/debug
     let debugPath = currentDirectoryURL.appendingPathComponent(".build").appendingPathComponent("debug")
     if FileManager.default.fileExists(atPath: debugPath.path) {
         return debugPath
     }
 
-    print("警告: 通常のビルドディレクトリが見つからないため、現在のディレクトリを使用します。")
+    print("Warning: Normal build directory not found, using current directory.")
     return currentDirectoryURL
     #else
-    // Linux など他のプラットフォームでは適切なパス解決が必要
+    // Proper path resolution needed for other platforms like Linux
     return Bundle.main.bundleURL
     #endif
 }
 
-/// コマンドラインツールを実行し、結果を取得するヘルパー関数
+/// Helper function to run the command-line tool and get results
 func runExecutable(arguments: [String]) throws -> (output: String, error: String, status: Int32) {
     let executableName = "smp"
     let productsDirectory = getProductsDirectory()
     let executableURL = productsDirectory.appendingPathComponent(executableName)
 
-    // 実行可能ファイルが存在するか確認
+    // Check if the executable exists
     guard FileManager.default.fileExists(atPath: executableURL.path) else {
-        print("警告: 実行可能ファイルが見つかりません: \(executableURL.path)")
-        print("実行ディレクトリ: \(FileManager.default.currentDirectoryPath)")
-        print("製品ディレクトリ: \(productsDirectory.path)")
+        print("Warning: Executable not found: \(executableURL.path)")
+        print("Execution directory: \(FileManager.default.currentDirectoryPath)")
+        print("Products directory: \(productsDirectory.path)")
 
-        // 実際のビルド結果を確認
+        // Check actual build results
         let fm = FileManager.default
         if fm.fileExists(atPath: productsDirectory.path) {
-            print("製品ディレクトリの内容:")
+            print("Contents of products directory:")
             do {
                 let contents = try fm.contentsOfDirectory(atPath: productsDirectory.path)
                 for item in contents {
                     print("- \(item)")
                 }
             } catch {
-                print("ディレクトリ内容の取得に失敗: \(error)")
+                print("Failed to retrieve directory contents: \(error)")
             }
         }
 
-        // コマンドラインテストをスキップする代わりにエラーをスロー
+        // Throw an error instead of skipping command-line tests
         struct ExecutableNotFoundError: Error, CustomStringConvertible {
             let message: String
             var description: String { return message }
         }
-        throw ExecutableNotFoundError(message: "実行可能ファイルが見つからないため、コマンドラインツールのテストをスキップします")
+        throw ExecutableNotFoundError(message: "Command-line tool tests are skipped because the executable was not found")
     }
 
     let task = Process()
@@ -83,18 +83,18 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
     return (outputString, errorString, task.terminationStatus)
 }
 
-/// コマンドラインツールの実行テスト
+/// Command-line tool execution tests
 ///
-/// このテストスイートでは、ビルドされた実行可能ファイル（バイナリ）を直接実行し、
-/// そのコマンドライン引数の処理や出力が期待通りであることを確認する
+/// This test suite directly executes the built executable (binary) and
+/// verifies that its command-line argument processing and output are as expected
 @Suite struct CommandLineToolTests {
 
-    @Test("CLI: サブコマンドなしで実行すると、ヘルプが表示されること")
+    @Test("CLI: Running without a subcommand should display help")
     func testNoSubcommandShowsHelp() throws {
         do {
             let result = try runExecutable(arguments: [])
 
-            // ヘルプの一部が含まれていることを確認
+            // Check that help content is included
             #expect(result.output.contains("USAGE:") || result.error.contains("USAGE:"))
             #expect(result.output.contains("smp") || result.error.contains("smp"))
         } catch {
@@ -102,7 +102,7 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
         }
     }
 
-    @Test("CLI: simpleコマンドが正常に実行されること")
+    @Test("CLI: simple command should execute successfully")
     func testSimpleCommand() throws {
         do {
             let result = try runExecutable(arguments: ["simple"])
@@ -114,7 +114,7 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
         }
     }
 
-    @Test("CLI: argsコマンドが基本的な引数を正しく処理すること")
+    @Test("CLI: args command should correctly process basic arguments")
     func testArgsCommandBasic() throws {
         do {
             let result = try runExecutable(arguments: ["args", "testing"])
@@ -126,7 +126,7 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
         }
     }
 
-    @Test("CLI: argsコマンドがcountオプションを正しく処理すること")
+    @Test("CLI: args command should correctly process the count option")
     func testArgsCommandWithCount() throws {
         do {
             let result = try runExecutable(arguments: ["args", "testing", "--count", "3"])
@@ -138,7 +138,7 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
         }
     }
 
-    @Test("CLI: argsコマンドがuppercase フラグを正しく処理すること")
+    @Test("CLI: args command should correctly process the uppercase flag")
     func testArgsCommandWithUppercase() throws {
         do {
             let result = try runExecutable(arguments: ["args", "testing", "--uppercase"])
@@ -150,7 +150,7 @@ func runExecutable(arguments: [String]) throws -> (output: String, error: String
         }
     }
 
-    @Test("CLI: argsコマンドが複数のオプションを正しく処理すること")
+    @Test("CLI: args command should correctly process multiple options")
     func testArgsCommandWithMultipleOptions() throws {
         do {
             let result = try runExecutable(arguments: ["args", "testing", "-c", "2", "-u"])

@@ -1,42 +1,42 @@
 # Swift Command Line Tool Sample
 
-Swift で作成された高機能なコマンドラインツールのサンプルプロジェクト。引数パース、シェルコマンド実行、非同期処理など様々な機能を実装しています。
+A sample project of a feature-rich command-line tool created with Swift. It implements various features including argument parsing, shell command execution, asynchronous processing, and more.
 
-## サンプル実装
+## Sample Implementations
 
-- 基本的なシェルコマンド実行
-- 複数コマンドの連続実行
-- パイプラインを使用した複雑なコマンド実行
-- コマンド出力の処理・変換
-- コマンドライン引数の多様なパターン受付
-- Swift Concurrencyを使用した非同期・並列処理
-- ファイル操作と変換処理
+- Basic shell command execution
+- Sequential execution of multiple commands
+- Complex command execution using pipelines
+- Processing and transformation of command output
+- Various patterns for accepting command-line arguments
+- Asynchronous and parallel processing using Swift Concurrency
+- File operations and transformation processing
 
-## ビルドと実行
+## Build and Run
 
 ```bash
-# プロジェクトのビルド
+# Build the project
 swift build
 
-# コマンドの実行
-swift run smp [サブコマンド] [オプション]
+# Run the command
+swift run smp [subcommand] [options]
 
-# または直接実行ファイルを実行
-.build/debug/smp [サブコマンド] [オプション]
+# Or run the executable directly
+.build/debug/smp [subcommand] [options]
 ```
 
-## テスト
+## Testing
 
-Swift Testing フレームワークを使用したテストを実装しています。テストの実行方法：
+Tests are implemented using the Swift Testing framework. How to run tests:
 
 ```bash
-# すべてのテストを実行
+# Run all tests
 swift test
 
-# 特定のテストスイートを実行
+# Run specific test suite
 swift test --filter SwiftCommandLineToolSampleTests/CommandExecutorTests
 
-# テストに関する詳細はテストディレクトリのREADMEを参照
+# See the test directory README for more details
 ```
 
-詳細は [テストガイド](Tests/SwiftCommandLineToolSampleTests/README.md) を参照してください。
+For more details, see the [Test Guide](Tests/SwiftCommandLineToolSampleTests/README.md).
