@@ -155,20 +155,19 @@ struct SwiftCommandLineToolSample: ParsableCommand {
         var uppercase: Bool = false
 
         func run() throws {
-            let fixedText = uppercase ? text.uppercased() : text
+            let executor = CommandExecutor()
+            let result = try executor.executeTextProcessing(text, count: count, uppercase: uppercase)
 
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-
-            var command = "echo"
-            for _ in 0..<count {
-                command += " \"\(fixedText)\""
+            // 実行結果が成功（終了コード0）でなければエラーを投げる
+            if result.exitCode != 0 {
+                print(result.error)
+                throw ExitCode(result.exitCode)
             }
 
-            process.arguments = ["-c", command]
-
-            try process.run()
-            process.waitUntilExit()
+            // 標準出力があれば表示
+            if !result.output.isEmpty {
+                print(result.output)
+            }
         }
     }
 
